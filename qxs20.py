@@ -150,6 +150,29 @@ class TilePuzzle(object):
                 score += abs(x - target_x) + abs(y - target_y)
         return score
 
+    def calc_conflict(self):
+        # test col conflicts
+        cost = 0
+        for x in range(self.cnum):
+            for y1 in range(0, self.rnum - 1):
+                y2 = y1 + 1
+                n1 = self.board[y1][x]
+                n2 = self.board[y2][x]
+                tn1 = self.board[(n1 - 1) // self.cnum][(n1 - 1) % self.rnum]
+                tn2 = self.board[(n2 - 1) // self.cnum][(n2 - 1) % self.rnum]
+                if n1 == tn2 and n2 == tn1:
+                    cost += 1
+        for y in range(self.rnum):
+            for x1 in range(0, self.cnum - 1):
+                x2 = x1 + 1
+                n1 = self.board[y][x1]
+                n2 = self.board[y][x2]
+                tn1 = self.board[(n1 - 1) // self.cnum][(n1 - 1) % self.rnum]
+                tn2 = self.board[(n2 - 1) // self.cnum][(n2 - 1) % self.rnum]
+                if n1 == tn2 and n2 == tn1:
+                    cost += 1
+        return cost
+
     # Required
     def find_solution_a_star(self):
         q = PriorityQueue()
@@ -163,7 +186,7 @@ class TilePuzzle(object):
                     return LinkedMoves(move, last_move=last_move).list
                 if suc.board not in known_board:
                     known_board.append(suc.board)
-                    q.put((suc.calc_distance(), LinkedMoves(move, last_move=last_move), suc))
+                    q.put((suc.calc_distance() + suc.calc_conflict() * 2, LinkedMoves(move, last_move=last_move), suc))
 
 
 ############################################################
