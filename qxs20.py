@@ -143,12 +143,10 @@ class TilePuzzle(object):
         for y in range(self.rnum):
             for x in range(self.cnum):
                 num = self.board[y][x]
-                if num != 0:
-                    target_x = (num - 1) % self.cnum
-                    target_y = (num - 1) // self.rnum
-                else:
-                    target_x = self.cnum - 1
-                    target_y = self.rnum - 1
+                if num == 0:
+                    continue
+                target_x = (num - 1) % self.cnum
+                target_y = (num - 1) // self.rnum
                 score += abs(x - target_x) + abs(y - target_y)
         return score
 
@@ -251,4 +249,3 @@ Type your response here.
 Your response may span multiple lines.
 Do not include these instructions in your response.
 """
-
