@@ -1,7 +1,8 @@
 import sys
 import Tkinter
 
-import homework3
+import qxs20 as homework3
+
 
 class Grid(Tkinter.Canvas):
 
@@ -9,8 +10,8 @@ class Grid(Tkinter.Canvas):
         self.rows, self.cols = len(scene), len(scene[0])
         self.square_size = min(40, 500 / self.rows, 500 / self.cols)
         Tkinter.Canvas.__init__(self, master,
-            height=self.square_size * self.rows + 1,
-            width=self.square_size * self.cols + 1, background="white")
+                                height=self.square_size * self.rows + 1,
+                                width=self.square_size * self.cols + 1, background="white")
         self.draw_scene(scene)
         self.scene = scene
         self.start_and_goal = start_and_goal
@@ -26,7 +27,7 @@ class Grid(Tkinter.Canvas):
                 x0, y0 = col * self.square_size, row * self.square_size
                 x1, y1 = x0 + self.square_size, y0 + self.square_size
                 self.create_rectangle(x0, y0, x1, y1, width=1, outline="black",
-                    fill="gray50" if scene[row][col] else "white")
+                                      fill="gray50" if scene[row][col] else "white")
 
     def transform(self, (row, col)):
         x = self.square_size * (col + 0.5)
@@ -64,21 +65,22 @@ class Grid(Tkinter.Canvas):
         x, y = self.transform(point)
         radius = self.square_size / 4.0
         return self.create_oval(x - radius, y - radius, x + radius, y + radius,
-            fill=color, tags=tags)
+                                fill=color, tags=tags)
 
     def draw_line(self, p, q, color="black", width=1, arrow=None, tags=""):
         p_x, p_y = self.transform(p)
         q_x, q_y = self.transform(q)
         return self.create_line(p_x, p_y, q_x, q_y, fill=color, width=width,
-            arrow=arrow, tags=tags)
+                                arrow=arrow, tags=tags)
 
     def draw_path(self, path):
         for p, q in zip(path, path[1:]):
             self.draw_line(p, q, color="blue", width=2, arrow=Tkinter.LAST,
-                tags="path")
+                           tags="path")
 
     def clear_paths(self):
         self.delete("path")
+
 
 class GridNavigationGUI(Tkinter.Frame):
 
@@ -103,7 +105,7 @@ class GridNavigationGUI(Tkinter.Frame):
             fill=Tkinter.X, padx=1, pady=1)
         Tkinter.Button(menu, text="Clear Paths", command=self.clear_paths_click).pack(
             fill=Tkinter.X, padx=1, pady=1)
-        
+
         menu.pack(side=Tkinter.RIGHT)
 
     def find_path_click(self):
@@ -115,6 +117,7 @@ class GridNavigationGUI(Tkinter.Frame):
 
     def clear_paths_click(self):
         self.grid.clear_paths()
+
 
 def load_scene(scene_path):
     scene = []
@@ -128,7 +131,7 @@ def load_scene(scene_path):
                     scene[-1].append(True)
                 else:
                     print ("Unrecognized character '%s' at line %d, column %d" %
-                        (char, row, col))
+                           (char, row, col))
                     return None
     if len(scene) < 1:
         print "Scene must have at least one row"
@@ -140,6 +143,7 @@ def load_scene(scene_path):
         print "Not all rows are of equal length"
         return None
     return scene
+
 
 if __name__ == "__main__":
     root = Tkinter.Tk()

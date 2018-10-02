@@ -120,6 +120,7 @@ class TilePuzzle(object):
             yield (move, new)
 
     # Required
+    # TODO improve efficiency
     def find_solutions_iddfs(self):
         depth = 0
         last_move = None
