@@ -150,27 +150,24 @@ class TilePuzzle(object):
                 score += abs(x - target_x) + abs(y - target_y)
         return score
 
+    def target_pos(self, num):
+        return (num - 1) % self.cnum, (num - 1) // self.rnum
+
     def calc_conflict(self):
         # test col conflicts
         cost = 0
-        for x in range(self.cnum):
-            for y1 in range(0, self.rnum - 1):
-                y2 = y1 + 1
-                n1 = self.board[y1][x]
-                n2 = self.board[y2][x]
-                tn1 = self.board[(n1 - 1) // self.cnum][(n1 - 1) % self.rnum]
-                tn2 = self.board[(n2 - 1) // self.cnum][(n2 - 1) % self.rnum]
-                if n1 == tn2 and n2 == tn1:
-                    cost += 1
-        for y in range(self.rnum):
-            for x1 in range(0, self.cnum - 1):
-                x2 = x1 + 1
-                n1 = self.board[y][x1]
-                n2 = self.board[y][x2]
-                tn1 = self.board[(n1 - 1) // self.cnum][(n1 - 1) % self.rnum]
-                tn2 = self.board[(n2 - 1) // self.cnum][(n2 - 1) % self.rnum]
-                if n1 == tn2 and n2 == tn1:
-                    cost += 1
+        for x in range(self.cnum - 1):
+            for y in range(self.rnum - 1):
+                n_origin = self.board[y][x]
+                if n_origin == 0:
+                    continue
+                xt, yt = self.target_pos(n_origin)
+                if (xt == x and yt == y) or (xt != x and yt != y):
+                    continue
+                if xt == x:
+                    cost += ((x, y) == self.target_pos(self.board[y + 1][x]))
+                elif yt == y:
+                    cost += ((x, y) == self.target_pos(self.board[y][x + 1]))
         return cost
 
     # Required
