@@ -127,17 +127,18 @@ class TilePuzzle(object):
         solutions = []
         while len(solutions) == 0:
             depth += 1
-            self.dls(depth, None, solutions)
+            print "depth = %d" % depth
+            self.iddfs_helper(depth, None, solutions)
         for sol in solutions:
             yield sol
 
-    def dls(self, depth_limit, last_move, solutions):
+    def iddfs_helper(self, depth_limit, last_move, solutions):
         if depth_limit == 0:
             if self.is_solved():
                 solutions.append(last_move.list)
         else:
             for move, suc in self.successors():
-                suc.dls(depth_limit - 1, LinkedMoves(move, last_move=last_move), solutions)
+                suc.iddfs_helper(depth_limit - 1, LinkedMoves(move, last_move=last_move), solutions)
 
     def calc_distance(self):
         score = 0
@@ -190,9 +191,34 @@ class TilePuzzle(object):
 ############################################################
 # Section 2: Grid Navigation
 ############################################################
+def _euclidean_dis(start, goal):
+    return ((start[0] - goal[0]) ** 2 + (start[1] - goal[1]) ** 2) ** 0.5
+
 
 def find_path(start, goal, scene):
-    pass
+    print "find_path(%s,%s)" % start, goal
+    q = PriorityQueue()
+    # print "size: row%d x col%d" % (len(scene), len(scene[0]))
+    known_points = [start]
+    # put (dis+uniform cost, move list)
+    q.put((0, LinkedMoves(start)))
+    while not q.empty():
+        _, last_move = q.get()
+        for ydiff in range(-1, 2):
+            for xdiff in range(-1, 2):
+                lastp = last_move.move
+                newp = (lastp[0] + xdiff, lastp[1] + ydiff)
+                print newp
+                if newp[1] < 0 or newp[1] >= len(scene[0]) or newp[0] < 0 or newp[0] >= len(scene):
+                    continue
+                if scene[newp[0]][newp[1]] or newp in known_points:
+                    continue
+                if newp == goal:
+                    return LinkedMoves(newp, last_move=last_move).list
+                known_points.append(newp)
+                q.put((_euclidean_dis(newp, goal), LinkedMoves(newp, last_move=last_move)))
+    print("unsolvable")
+    return []
 
 
 ############################################################
