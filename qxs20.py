@@ -196,7 +196,6 @@ def _euclidean_dis(start, goal):
 
 
 def find_path(start, goal, scene):
-    print "find_path(%s,%s)" % start, goal
     q = PriorityQueue()
     # print "size: row%d x col%d" % (len(scene), len(scene[0]))
     known_points = [start]
@@ -225,8 +224,80 @@ def find_path(start, goal, scene):
 # Section 3: Linear Disk Movement, Revisited
 ############################################################
 
+class DiskPuzzle(object):
+    __slots__ = "board", "board_len", "disk_num"
+    empty = -1
+    NA = 10086
+
+    def __init__(self, board, disk_num):
+        self.disk_num = disk_num
+        self.board = board
+        self.board_len = len(self.board)
+
+    def copy(self):
+        return DiskPuzzle(self.board[:], self.disk_num)
+
+    def __str__(self):
+        return "".join(["(_)" if chess == DiskPuzzle.empty else "(%d)" % chess for chess in self.board])
+
+    def solved(self):
+        for i in range(1, self.disk_num + 1):
+            if self.board[-i] != i - 1:
+                return False
+        return True
+
+    def move(self, start, end):
+        self.board[start], self.board[end] = self.board[end], self.board[start]
+        return self
+
+    def successors(self, last_moves=None, iterated_board=None):
+        if iterated_board is None:
+            iterated_board = []
+        for i, disk in enumerate(self.board):
+            if disk == DiskPuzzle.empty:
+                continue
+            diffs = [2, 1, -1, -2]
+            for diff in diffs:
+                if self.get(i + diff) == DiskPuzzle.empty and (
+                        (i + diff - 1) == i or (self.get(i + diff - 1) != DiskPuzzle.empty)):
+                    new_puzzle = self.copy().move(i, i + diff)
+                    if new_puzzle.board not in iterated_board:
+                        yield ((i, i + diff), new_puzzle)
+
+    def get(self, pos):
+        return self.board[pos] if self.board_len > pos >= 0 else DiskPuzzle.NA
+
+    def heuristic_cost(self):
+        cost = 0
+        for i, chess in enumerate(self.board):
+            if chess == DiskPuzzle.empty:
+                continue
+            cost += abs((self.board_len - chess) - i)
+        return cost
+
+    def solve(self):
+        q = PriorityQueue()
+        q.put((self.heuristic_cost(), self, None))
+        known = [self.board]
+        while not q.empty():
+            cost, puzzle, moves = q.get()
+            if puzzle.solved():
+                return moves
+            for move, suc in puzzle.successors():
+                if suc.solved():
+                    return LinkedMoves(move, moves)
+                if not move or not moves or (move[1], move[0]) != moves.move:
+                    if suc.board not in known:
+                        known.append(suc.board)
+                        q.put((suc.heuristic_cost(), suc, LinkedMoves(move, moves)))
+
+
+def create_disk_puzzle(length, n):
+    return DiskPuzzle([i if i < n else DiskPuzzle.empty for i in range(length)], n)
+
+
 def solve_distinct_disks(length, n):
-    pass
+    return create_disk_puzzle(length, n).solve()
 
 
 ############################################################
