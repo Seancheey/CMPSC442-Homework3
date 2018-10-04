@@ -119,27 +119,6 @@ class TilePuzzle(object):
             new.perform_move(move)
             yield (move, new)
 
-    # Required
-    # TODO improve efficiency
-    def find_solutions_iddfs(self):
-        depth = 0
-        last_move = None
-        solutions = []
-        while len(solutions) == 0:
-            depth += 1
-            print "depth = %d" % depth
-            self.iddfs_helper(depth, None, solutions)
-        for sol in solutions:
-            yield sol
-
-    def iddfs_helper(self, depth_limit, last_move, solutions):
-        if depth_limit == 0:
-            if self.is_solved():
-                solutions.append(last_move.list)
-        else:
-            for move, suc in self.successors():
-                suc.iddfs_helper(depth_limit - 1, LinkedMoves(move, last_move=last_move), solutions)
-
     def calc_distance(self):
         score = 0
         for y in range(self.rnum):
@@ -172,6 +151,29 @@ class TilePuzzle(object):
                     cost += ((x, y) == self.target_pos(self.board[y][x + 1]))
         return cost
 
+    def calc_cost(self):
+        return self.calc_distance() + self.calc_conflict() * 2
+
+    # Required
+    def find_solutions_iddfs(self):
+        depth = 0
+        solved = False
+        while not solved:
+            depth += 1
+            print "depth = %d" % depth
+            for sol in self.iddfs_helper(depth, None):
+                yield sol
+                solved = True
+
+    def iddfs_helper(self, depth_limit, last_move):
+        if depth_limit == 0:
+            if self.is_solved():
+                yield last_move.list
+        else:
+            for move, suc in self.successors():
+                for sol in suc.iddfs_helper(depth_limit - 1, LinkedMoves(move, last_move=last_move)):
+                    yield sol
+
     # Required
     def find_solution_a_star(self):
         q = PriorityQueue()
@@ -185,7 +187,7 @@ class TilePuzzle(object):
                     return LinkedMoves(move, last_move=last_move).list
                 if suc.board not in known_board:
                     known_board.append(suc.board)
-                    q.put((suc.calc_distance() + suc.calc_conflict() * 2, LinkedMoves(move, last_move=last_move), suc))
+                    q.put((suc.calc_cost(), LinkedMoves(move, last_move=last_move), suc))
 
 
 ############################################################
@@ -250,7 +252,7 @@ class DiskPuzzle(object):
         self.board[start], self.board[end] = self.board[end], self.board[start]
         return self
 
-    def successors(self, last_moves=None, iterated_board=None):
+    def successors(self, iterated_board=None):
         if iterated_board is None:
             iterated_board = []
         for i, disk in enumerate(self.board):
