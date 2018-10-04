@@ -13,7 +13,7 @@ from random import choice
 from Queue import PriorityQueue
 
 
-class LinkedMoves():
+class LinkedMoves:
     def __init__(self, move, last_move=None):
         self.move = move
         self.last_move = last_move
@@ -59,7 +59,7 @@ class TilePuzzle(object):
         self.board = board
         self.rnum = len(board)
         self.cnum = len(board[0])
-        if zero_pos == None:
+        if zero_pos is None:
             for y in range(self.rnum):
                 for x in range(self.cnum):
                     if self.board[x][y] == 0:
@@ -197,17 +197,15 @@ def _euclidean_dis(start, goal):
 
 def find_path(start, goal, scene):
     q = PriorityQueue()
-    # print "size: row%d x col%d" % (len(scene), len(scene[0]))
     known_points = [start]
-    # put (dis+uniform cost, move list)
-    q.put((0, LinkedMoves(start)))
+    # put (euc dis+travel cost, move list, cumulative travel cost)
+    q.put((0, LinkedMoves(start), 0))
     while not q.empty():
-        _, last_move = q.get()
+        _, last_move, travel_cost = q.get()
         for ydiff in range(-1, 2):
             for xdiff in range(-1, 2):
                 lastp = last_move.move
                 newp = (lastp[0] + xdiff, lastp[1] + ydiff)
-                print newp
                 if newp[1] < 0 or newp[1] >= len(scene[0]) or newp[0] < 0 or newp[0] >= len(scene):
                     continue
                 if scene[newp[0]][newp[1]] or newp in known_points:
@@ -215,7 +213,9 @@ def find_path(start, goal, scene):
                 if newp == goal:
                     return LinkedMoves(newp, last_move=last_move).list
                 known_points.append(newp)
-                q.put((_euclidean_dis(newp, goal), LinkedMoves(newp, last_move=last_move)))
+                step_cost = abs(xdiff) + abs(ydiff)
+                q.put((_euclidean_dis(newp, goal) + travel_cost + step_cost, LinkedMoves(newp, last_move=last_move),
+                       travel_cost + step_cost))
     print("unsolvable")
     return []
 
