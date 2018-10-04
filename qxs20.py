@@ -160,7 +160,7 @@ class TilePuzzle(object):
         solved = False
         while not solved:
             depth += 1
-            print "depth = %d" % depth
+            print "testing depth = %d" % depth
             for sol in self.iddfs_helper(depth, None):
                 yield sol
                 solved = True
@@ -171,8 +171,10 @@ class TilePuzzle(object):
                 yield last_move.list
         else:
             for move, suc in self.successors():
-                for sol in suc.iddfs_helper(depth_limit - 1, LinkedMoves(move, last_move=last_move)):
-                    yield sol
+                if not last_move or TilePuzzle.moves[move][0] != -TilePuzzle.moves[last_move.move][0] or \
+                        TilePuzzle.moves[move][1] != -TilePuzzle.moves[last_move.move][1]:
+                    for sol in suc.iddfs_helper(depth_limit - 1, LinkedMoves(move, last_move=last_move)):
+                        yield sol
 
     # Required
     def find_solution_a_star(self):
