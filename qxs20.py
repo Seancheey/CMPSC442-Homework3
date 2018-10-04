@@ -63,9 +63,12 @@ class TilePuzzle(object):
             for y in range(self.rnum):
                 for x in range(self.cnum):
                     if self.board[x][y] == 0:
-                        self.zero_pos = (x, y)
+                        self.zero_pos = (y, x)
         else:
             self.zero_pos = zero_pos
+
+    def __str__(self):
+        return "\n".join([" ".join([str(i) for i in row]) for row in self.board]) + "\n"
 
     def get_board(self):
         return self.board
@@ -156,6 +159,9 @@ class TilePuzzle(object):
 
     # Required
     def find_solutions_iddfs(self):
+        if self.is_solved():
+            yield []
+            return
         depth = 0
         solved = False
         while not solved:
