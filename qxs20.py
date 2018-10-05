@@ -315,7 +315,14 @@ def solve_distinct_disks(length, n):
 ############################################################
 
 def create_dominoes_game(rows, cols):
-    return DominoesGame([[False for _ in cols] for _ in range(rows)])
+    return DominoesGame([[False for _ in range(cols)] for _ in range(rows)])
+
+
+def _cover_pos(row, col, vertical):
+    if vertical:
+        return [(row, col), (row + 1, col)]
+    else:
+        return [(row, col), (row, col + 1)]
 
 
 class DominoesGame(object):
@@ -330,28 +337,45 @@ class DominoesGame(object):
         return self.board
 
     def reset(self):
-        pass
+        for row in self.board:
+            for i in range(len(row)):
+                row[i] = False
 
     def is_legal_move(self, row, col, vertical):
-        pass
+        if row >= self.rnum or col >= self.cnum or row < 0 or col < 0 or self.board[row][col]:
+            return False
+        if vertical:
+            return row + 1 < self.rnum and not self.board[row + 1][col]
+        else:
+            return col + 1 < self.cnum and not self.board[row][col + 1]
 
     def legal_moves(self, vertical):
-        pass
+        moves = []
+        for y in range(self.rnum - vertical):
+            for x in range(self.cnum - (not vertical)):
+                if self.is_legal_move(y, x, vertical):
+                    moves.append((y, x))
+        return moves
 
     def perform_move(self, row, col, vertical):
-        pass
+        if self.is_legal_move(row, col, vertical):
+            self.board[row][col] = True
+            self.board[row + vertical][col + (not vertical)] = True
 
     def game_over(self, vertical):
-        pass
+        return not len(self.legal_moves(vertical))
 
     def copy(self):
-        pass
+        return DominoesGame([[i for i in row] for row in self.board])
 
     def successors(self, vertical):
-        pass
+        for move in self.legal_moves(vertical):
+            new = self.copy()
+            new.perform_move(move[0], move[1], vertical)
+            yield (move, new)
 
     def get_random_move(self, vertical):
-        pass
+        return choice(self.legal_moves(vertical))
 
     # Required
     def get_best_move(self, vertical, limit):
@@ -374,4 +398,3 @@ I found it hard to think up a good heuristic cost for sliding tile puzzle.
 feedback_question_3 = """
 I enjoyed writing the code although it took me so long.
 """
-
