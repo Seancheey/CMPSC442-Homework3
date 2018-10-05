@@ -315,17 +315,19 @@ def solve_distinct_disks(length, n):
 ############################################################
 
 def create_dominoes_game(rows, cols):
-    pass
+    return DominoesGame([[False for _ in cols] for _ in range(rows)])
 
 
 class DominoesGame(object):
 
     # Required
     def __init__(self, board):
-        pass
+        self.board = board
+        self.rnum = len(self.board)
+        self.cnum = len(self.board[0])
 
     def get_board(self):
-        pass
+        return self.board
 
     def reset(self):
         pass
@@ -361,19 +363,15 @@ class DominoesGame(object):
 ############################################################
 
 feedback_question_1 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+7 hours.
 """
 
 feedback_question_2 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+Optimizing efficiency of my code is the most challenging part.
+I found it hard to think up a good heuristic cost for sliding tile puzzle.
 """
 
 feedback_question_3 = """
-Type your response here.
-Your response may span multiple lines.
-Do not include these instructions in your response.
+I enjoyed writing the code although it took me so long.
 """
+
