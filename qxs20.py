@@ -379,7 +379,7 @@ class DominoesGame(object):
 
     # Required
     def get_best_move(self, vertical, limit):
-        return self.max_value(vertical, limit, -1000, 1000)
+        return self.mm_value(max, vertical, limit, -1000, 1000)
 
     def score(self, vertical, is_max):
         if is_max:
@@ -387,36 +387,26 @@ class DominoesGame(object):
         else:
             return len(self.legal_moves(not vertical)) - len(self.legal_moves(vertical))
 
-    def max_value(self, vertical, limit, alpha, beta):
+    def mm_value(self, mm, vertical, limit, alpha, beta):
+        print("{}(a={},b={})".format("max" if mm is max else "min", alpha, beta))
+        # base case
         if limit == 1:
             # move, score, leaves visited
-            return max([(move, game.score(vertical, is_max=True), len(self.legal_moves(vertical))) for move, game in
-                        self.successors(vertical)], key=lambda x: x[1])
-        best_move, v, leaves = (), -1000, 0
-        for i, move_game in enumerate(self.successors(vertical)):
-            move, game = move_game
-            _, score, l = game.min_value(not vertical, limit - 1, alpha, beta)
+            successors = list(self.successors(vertical))
+            if len(successors) == 0:
+                return None, -1000, 0
+            score, move = mm([(game.score(vertical, mm is max), move) for move, game in successors])
+            return move, score, len(successors)
+        best_move, v, leaves = None, -1000, 0
+        # recursive part
+        for move, game in self.successors(vertical):
+            _, score, l = game.mm_value(max if mm is min else min, not vertical, limit - 1, alpha, beta)
             leaves += l
-            best_move, v = max([(best_move, v), (move, score)], key=lambda x: x[1])
-            if v >= beta:
+            v, best_move = mm((v, best_move), (score, move))
+            if (mm is max and v >= beta) or (mm is min and v <= alpha):
+                print "skip!"
                 return move, v, leaves
-            alpha = max(alpha, v)
-        return best_move, v, leaves
-
-    def min_value(self, vertical, limit, alpha, beta):
-        if limit == 1:
-            # move, score, leaves visited
-            return min([(move, game.score(vertical, is_max=False), len(self.legal_moves(vertical))) for move, game in
-                        self.successors(vertical)], key=lambda x: x[1])
-        best_move, v, leaves = (), 1000, 0
-        for i, move_game in enumerate(self.successors(vertical)):
-            move, game = move_game
-            _, score, l = game.min_value(not vertical, limit - 1, alpha, beta)
-            leaves += l
-            best_move, v = min([(best_move, v), (move, score)], key=lambda x: x[1])
-            if v <= alpha:
-                return move, v, leaves
-            beta = min(alpha, v)
+            alpha = mm(alpha if mm is max else beta, v)
         return best_move, v, leaves
 
 
