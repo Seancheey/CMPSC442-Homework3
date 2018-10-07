@@ -166,7 +166,6 @@ class TilePuzzle(object):
         solved = False
         while not solved:
             depth += 1
-            print "testing depth = %d" % depth
             for sol in self.iddfs_helper(depth, None):
                 yield sol
                 solved = True
@@ -226,8 +225,7 @@ def find_path(start, goal, scene):
                 step_cost = abs(xdiff) + abs(ydiff)
                 q.put((_euclidean_dis(newp, goal) + travel_cost + step_cost, LinkedMoves(newp, last_move=last_move),
                        travel_cost + step_cost))
-    print("unsolvable")
-    return []
+    return None
 
 
 ############################################################
