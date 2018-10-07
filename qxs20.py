@@ -387,26 +387,24 @@ class DominoesGame(object):
         else:
             return len(self.legal_moves(not vertical)) - len(self.legal_moves(vertical))
 
+    # this function combines min-value and max-value function
     def mm_value(self, mm, vertical, limit, alpha, beta):
-        print("{}(a={},b={})".format("max" if mm is max else "min", alpha, beta))
         # base case
-        if limit == 1:
+        if limit == 0:
             # move, score, leaves visited
-            successors = list(self.successors(vertical))
-            if len(successors) == 0:
-                return None, -1000, 0
-            score, move = mm([(game.score(vertical, mm is max), move) for move, game in successors])
-            return move, score, len(successors)
-        best_move, v, leaves = None, -1000, 0
+            return None, self.score(vertical, mm is max), 1
+        best_move, v, leaves = None, 1000 if mm is min else -1000, 0
         # recursive part
         for move, game in self.successors(vertical):
             _, score, l = game.mm_value(max if mm is min else min, not vertical, limit - 1, alpha, beta)
             leaves += l
             v, best_move = mm((v, best_move), (score, move))
             if (mm is max and v >= beta) or (mm is min and v <= alpha):
-                print "skip!"
                 return move, v, leaves
-            alpha = mm(alpha if mm is max else beta, v)
+            if mm is min:
+                beta = min(beta, v)
+            else:
+                alpha = max(alpha, v)
         return best_move, v, leaves
 
 
