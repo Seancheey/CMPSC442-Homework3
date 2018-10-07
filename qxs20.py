@@ -379,7 +379,45 @@ class DominoesGame(object):
 
     # Required
     def get_best_move(self, vertical, limit):
-        pass
+        return self.max_value(vertical, limit, -1000, 1000)
+
+    def score(self, vertical, is_max):
+        if is_max:
+            return len(self.legal_moves(vertical)) - len(self.legal_moves(not vertical))
+        else:
+            return len(self.legal_moves(not vertical)) - len(self.legal_moves(vertical))
+
+    def max_value(self, vertical, limit, alpha, beta):
+        if limit == 1:
+            # move, score, leaves visited
+            return max([(move, game.score(vertical, is_max=True), len(self.legal_moves(vertical))) for move, game in
+                        self.successors(vertical)], key=lambda x: x[1])
+        best_move, v, leaves = (), -1000, 0
+        for i, move_game in enumerate(self.successors(vertical)):
+            move, game = move_game
+            _, score, l = game.min_value(not vertical, limit - 1, alpha, beta)
+            leaves += l
+            best_move, v = max([(best_move, v), (move, score)], key=lambda x: x[1])
+            if v >= beta:
+                return move, v, leaves
+            alpha = max(alpha, v)
+        return best_move, v, leaves
+
+    def min_value(self, vertical, limit, alpha, beta):
+        if limit == 1:
+            # move, score, leaves visited
+            return min([(move, game.score(vertical, is_max=False), len(self.legal_moves(vertical))) for move, game in
+                        self.successors(vertical)], key=lambda x: x[1])
+        best_move, v, leaves = (), 1000, 0
+        for i, move_game in enumerate(self.successors(vertical)):
+            move, game = move_game
+            _, score, l = game.min_value(not vertical, limit - 1, alpha, beta)
+            leaves += l
+            best_move, v = min([(best_move, v), (move, score)], key=lambda x: x[1])
+            if v <= alpha:
+                return move, v, leaves
+            beta = min(alpha, v)
+        return best_move, v, leaves
 
 
 ############################################################
