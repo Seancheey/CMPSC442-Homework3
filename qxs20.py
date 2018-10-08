@@ -183,6 +183,8 @@ class TilePuzzle(object):
 
     # Required
     def find_solution_a_star(self):
+        if self.is_solved():
+            return []
         q = PriorityQueue()
         known_board = [self.board]
         # put self's score, move, board into queue
@@ -205,6 +207,8 @@ def _euclidean_dis(start, goal):
 
 
 def find_path(start, goal, scene):
+    if start == goal:
+        return []
     q = PriorityQueue()
     known_points = [start]
     # put (euc dis+travel cost, move list, cumulative travel cost)
@@ -284,6 +288,8 @@ class DiskPuzzle(object):
         return cost
 
     def solve(self):
+        if self.solved():
+            return []
         q = PriorityQueue()
         q.put((self.heuristic_cost(), self, None))
         known = [self.board]
@@ -404,6 +410,9 @@ class DominoesGame(object):
             else:
                 alpha = max(alpha, v)
         return best_move, v, leaves
+
+    def __str__(self):
+        return "\n".join(["[" + "".join(["X" if x else "O" for x in row]) + "]" for row in self.board])
 
 
 ############################################################
