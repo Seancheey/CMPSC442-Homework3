@@ -23,24 +23,9 @@ def test_tile_puzzle():
     assert sol == ['right', 'down', 'left', 'left', 'up',
                    'right', 'down', 'right', 'up', 'left',
                    'left', 'down', 'right', 'right']
-
-
-def test_disk_puzzle():
-    p = create_disk_puzzle(7, 6)
-    print p
-    for move in p.solve():
-        p.move(move[0], move[1])
-        print p
-
-
-def test_dominos():
-    b = [[False] * 3 for _ in range(3)]
-    g = DominoesGame(b)
-    print g.get_best_move(True, 1)
-    print g.get_best_move(True, 2)
-    g.perform_move(0, 1, True)
-    print g.get_best_move(False, 1)
-    print g.get_best_move(False, 2)
+    p_solved = create_tile_puzzle(5, 5)
+    assert p_solved.find_solution_a_star() == []
+    assert list(p_solved.find_solutions_iddfs()) == [[]]
 
 
 def test_grid_navigation():
@@ -53,8 +38,42 @@ def test_grid_navigation():
     sol = find_path((0, 0), (0, 2), scene2)
     print sol
     assert sol is None
+    sol = find_path((0, 0), (0, 0), scene)
+    assert sol == []
+
+
+def test_disk_puzzle():
+    p = create_disk_puzzle(7, 6)
+    print p
+    for move in p.solve():
+        p.move(move[0], move[1])
+        print p
+    assert p.solved()
+    assert p.solve() == []
+
+
+def test_dominos():
+    b = [[False] * 3 for _ in range(3)]
+    g = DominoesGame(b)
+    print g
+    print g.get_best_move(True, 1)
+    print g.get_best_move(True, 2)
+    g.perform_move(0, 1, True)
+    print g
+    print g.get_best_move(False, 1)
+    print g.get_best_move(False, 2)
+    g.perform_move(2, 1, False)
+    print g
+    print g.get_best_move(True, 2)
+    g.perform_move(0, 0, True)
+    print g
+    print g.get_best_move(False, 2)
+    test_big = [[False] * 5 for _ in range(5)]
+    print DominoesGame(test_big).get_best_move(True, 7)
 
 
 if __name__ == "__main__":
     test_tile_puzzle()
     test_grid_navigation()
+    test_disk_puzzle()
+    test_dominos()
