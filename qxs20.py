@@ -299,7 +299,7 @@ class DiskPuzzle(object):
                 return moves
             for move, suc in puzzle.successors():
                 if suc.solved():
-                    return LinkedMoves(move, moves)
+                    return LinkedMoves(move, moves).list
                 if not move or not moves or (move[1], move[0]) != moves.move:
                     if suc.board not in known:
                         known.append(suc.board)
@@ -402,7 +402,7 @@ class DominoesGame(object):
         for move, game in self.successors(vertical):
             _, score, l = game.mm_value(max if mm is min else min, not vertical, limit - 1, alpha, beta)
             leaves += l
-            v, best_move = mm((v, best_move), (score, move))
+            v, best_move = mm((v, best_move), (score, move), key=lambda x: x[0])
             if (mm is max and v >= beta) or (mm is min and v <= alpha):
                 return move, v, leaves
             if mm is min:
